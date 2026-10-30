@@ -324,22 +324,46 @@ palletCountGui.Parent         = game:GetService("CoreGui")
 
 local palletCountFrame = Instance.new("Frame")
 palletCountFrame.BackgroundColor3       = Color3.fromRGB(0, 0, 0)
-palletCountFrame.BackgroundTransparency = 0.5
-palletCountFrame.Size                   = UDim2.new(0, 240, 0, 40)
-palletCountFrame.Position               = UDim2.new(0.5, -120, 0, 10)
+palletCountFrame.BackgroundTransparency = 0.45
+palletCountFrame.Size                   = UDim2.new(0, 260, 0, 100)
+palletCountFrame.Position               = UDim2.new(0.5, -130, 0, 10)
 palletCountFrame.BorderSizePixel        = 0
 palletCountFrame.Parent                 = palletCountGui
-Instance.new("UICorner", palletCountFrame).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", palletCountFrame).CornerRadius = UDim.new(0, 8)
 
-local palletCountLabel = Instance.new("TextLabel")
-palletCountLabel.BackgroundTransparency = 1
-palletCountLabel.Size                   = UDim2.new(1, 0, 1, 0)
-palletCountLabel.TextColor3             = Color3.fromRGB(255, 255, 255)
-palletCountLabel.TextStrokeTransparency = 0
-palletCountLabel.Font                   = Enum.Font.GothamBold
-palletCountLabel.TextSize               = 15
-palletCountLabel.Text                   = "Pallets: 0"
-palletCountLabel.Parent                 = palletCountFrame
+local uiList = Instance.new("UIListLayout")
+uiList.Padding         = UDim.new(0, 2)
+uiList.FillDirection   = Enum.FillDirection.Vertical
+uiList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+uiList.SortOrder       = Enum.SortOrder.LayoutOrder
+uiList.Parent          = palletCountFrame
+
+local function makeInfoLabel(layoutOrder)
+    local lbl = Instance.new("TextLabel")
+    lbl.BackgroundTransparency = 1
+    lbl.Size                   = UDim2.new(1, -10, 0, 20)
+    lbl.TextColor3             = Color3.fromRGB(255, 255, 255)
+    lbl.TextStrokeTransparency = 0
+    lbl.Font                   = Enum.Font.GothamBold
+    lbl.TextSize               = 13
+    lbl.TextXAlignment         = Enum.TextXAlignment.Left
+    lbl.Text                   = ""
+    lbl.LayoutOrder            = layoutOrder
+    lbl.Parent                 = palletCountFrame
+    return lbl
+end
+
+local palletCountLabel  = makeInfoLabel(1)
+palletCountLabel.Text   = "Pallets: 0"
+
+local infoMapLabel      = makeInfoLabel(2)
+local infoKillerLabel   = makeInfoLabel(3)
+local infoMorphLabel    = makeInfoLabel(4)
+
+local uiPad = Instance.new("UIPadding")
+uiPad.PaddingLeft  = UDim.new(0, 8)
+uiPad.PaddingTop   = UDim.new(0, 5)
+uiPad.Parent       = palletCountFrame
 
 local pfDotFolder = workspace:FindFirstChild("_PF_Dots") or Instance.new("Folder")
 pfDotFolder.Name   = "_PF_Dots"
@@ -2238,14 +2262,6 @@ local function makeLabel(color, bold)
     return lbl
 end
 
-state.lblMapPrefix    = makeLabel(Color3.fromRGB(0, 255, 0))
-state.lblNamePrefix   = makeLabel(Color3.fromRGB(0, 249, 255))
-state.lblKillerPrefix = makeLabel(Color3.fromRGB(255, 51, 51))
-state.lblKillerThe    = makeLabel(Color3.fromRGB(255, 255, 255))
-state.lblMapValue     = makeLabel(Color3.fromRGB(255, 255, 255))
-state.lblNameValue    = makeLabel(Color3.fromRGB(255, 255, 255))
-state.lblKillerValue  = makeLabel(Color3.fromRGB(255, 255, 255))
-
 local function breakGen(point)
     pcall(function()
         local BreakEvent  = game:GetService("ReplicatedStorage").Remotes.Generator.BreakGenEvent
@@ -2819,7 +2835,9 @@ task.spawn(function()
             local mapInfo  = frame and frame:FindFirstChild("MapInfo")
             local mapTitle = mapInfo and mapInfo:FindFirstChild("MapTitle")
             local mapName  = mapTitle and mapTitle.ContentText or "Unknown"
-            local killerPlayer = "none"; local killerMorph = "none"
+
+            local killerPlayer = "none"
+            local killerMorph  = "none"
             for _, plr in ipairs(Players:GetPlayers()) do
                 local team = plr.Team
                 local teamName = team and tostring(team.Name) or ""
@@ -2833,24 +2851,10 @@ task.spawn(function()
                     break
                 end
             end
-            local size = 16; local startX = 10
-            local y1 = 450; local y2 = y1 + size + 4; local y3 = y2 + size + 4
-            local gap = 4
-            local p1Text = "Map | "
-            state.lblMapPrefix.Text = p1Text; state.lblMapPrefix.Position = Vector2.new(startX, y1); state.lblMapPrefix.Visible = true
-            local p1W = getTextWidth(p1Text, size)
-            state.lblMapValue.Text = mapName; state.lblMapValue.Position = Vector2.new(startX + p1W + gap, y1); state.lblMapValue.Visible = true
-            local p2Text = "Who Killer | "
-            state.lblNamePrefix.Text = p2Text; state.lblNamePrefix.Position = Vector2.new(startX, y2); state.lblNamePrefix.Visible = true
-            local p2W = getTextWidth(p2Text, size)
-            state.lblNameValue.Text = killerPlayer; state.lblNameValue.Position = Vector2.new(startX + p2W + gap, y2); state.lblNameValue.Visible = true
-            local p3Text = "Killer | "
-            state.lblKillerPrefix.Text = p3Text; state.lblKillerPrefix.Position = Vector2.new(startX, y3); state.lblKillerPrefix.Visible = true
-            local p3W = getTextWidth(p3Text, size)
-            local theText = "The "
-            state.lblKillerThe.Text = theText; state.lblKillerThe.Position = Vector2.new(startX + p3W + gap, y3); state.lblKillerThe.Visible = true
-            local theW = getTextWidth(theText, size)
-            state.lblKillerValue.Text = killerMorph; state.lblKillerValue.Position = Vector2.new(startX + p3W + gap + theW + gap, y3); state.lblKillerValue.Visible = true
+
+            infoMapLabel.Text    = "  Map    | " .. mapName
+            infoKillerLabel.Text = " Who Killer  | " .. killerPlayer
+            infoMorphLabel.Text  = "  Killer  | The " .. killerMorph
         end)
         task.wait(1.0)
     end
@@ -4287,13 +4291,6 @@ OasisUI:OnUnload(function()
     pcall(function() state.render.lockLine:Remove() end)
     pcall(function() state.render.lockLineCure:Remove() end)
     pcall(function() state.render.lockLineSurv:Remove() end)
-    pcall(function() state.lblMapPrefix:Remove() end)
-    pcall(function() state.lblMapValue:Remove() end)
-    pcall(function() state.lblNamePrefix:Remove() end)
-    pcall(function() state.lblNameValue:Remove() end)
-    pcall(function() state.lblKillerPrefix:Remove() end)
-    pcall(function() state.lblKillerValue:Remove() end)
-    pcall(function() state.lblKillerThe:Remove() end)
 
     -- destroy GUI
     pcall(function() espGui:Destroy() end)
